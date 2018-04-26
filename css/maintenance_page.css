@@ -1,0 +1,63 @@
+/**
+ * Custom styling for the Maintenance Page module.
+ */
+
+/* Base styles */
+body {
+  background: #fff;
+  color: #333;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 1em;
+  line-height: 1.6em;
+  padding: 5vh 5vw;
+}
+
+main {
+  margin: 0;
+  max-width: 600px;
+  text-align: left;
+}
+
+h1 {
+  font-size: 2.5em;
+  line-height: 1.2em;
+  margin: 0 0 0.75em;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: #0066ff;
+  text-decoration: underline;
+}
+
+a:hover,
+a:active,
+a:focus {
+  text-decoration: none;
+}
+
+/* Customisable styles */
+body.middle {
+  padding-top: 25vh;
+}
+
+main.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main.right {
+  margin-left: auto;
+}
+
+main.text-center {
+  text-align: center;
+}
+
+main.text-right {
+  text-align: right;
+}
+

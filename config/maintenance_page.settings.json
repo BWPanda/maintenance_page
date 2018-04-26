@@ -1,0 +1,13 @@
+{
+  "_config_name": "maintenance_page.setings",
+  "heading": "Site under maintenance",
+  "position_x": "center",
+  "position_y": "middle",
+  "text": "text-left",
+  "page_title": {
+    "title": "title",
+    "name": "name",
+    "slogan": 0
+  }
+}
+

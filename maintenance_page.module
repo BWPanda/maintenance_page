@@ -1,0 +1,143 @@
+<?php
+/**
+ * @file
+ * Provides a customisable 'maintenance mode' page, without the need for theming.
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function maintenance_page_config_info() {
+  return array(
+    'maintenance_page.settings' => array(
+      'label' => t('Maintenance Page settings'),
+      'group' => t('Configuration'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for system_site_maintenance_mode.
+ */
+function maintenance_page_form_system_site_maintenance_mode_alter(&$form, &$form_state, $form_id) {
+  $config = config('maintenance_page.settings');
+
+  // Edit existing settings.
+  $form['maintenance_mode_message']['#title'] = t('Maintenance page message');
+  $form['maintenance_mode_message']['#weight'] = 2;
+
+  // Add new settings.
+  $form['maintenance_page_heading'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maintenance page heading'),
+    '#default_value' => $config->get('heading'),
+    '#weight' => 1,
+  );
+  $form['maintenance_page_position_x'] = array(
+    '#type' => 'select',
+    '#title' => t('Horizontal alignment'),
+    '#options' => array(
+      'left' => t('Left'),
+      'center' => t('Center'),
+      'right' => t('Right'),
+    ),
+    '#default_value' => $config->get('position_x'),
+    '#weight' => 3,
+  );
+  $form['maintenance_page_position_y'] = array(
+    '#type' => 'select',
+    '#title' => t('Vertical alignment'),
+    '#options' => array(
+      'top' => t('Top'),
+      'middle' => t('Middle'),
+    ),
+    '#default_value' => $config->get('position_y'),
+    '#weight' => 4,
+  );
+  $form['maintenance_page_text'] = array(
+    '#type' => 'select',
+    '#title' => t('Text alignment'),
+    '#options' => array(
+      'text-left' => t('Left'),
+      'text-center' => t('Center'),
+      'text-right' => t('Right'),
+    ),
+    '#default_value' => $config->get('text'),
+    '#weight' => 5,
+  );
+  $form['maintenance_page_page_title'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Page title components'),
+    '#description' => t("Display these components in the page title (e.g. browser tab)."),
+    '#options' => array(
+      'title' => t('Maintenance page heading'),
+      'name' => t('Site name'),
+      'slogan' => t('Site slogan'),
+    ),
+    '#default_value' => $config->get('page_title'),
+    '#weight' => 6,
+  );
+  $form['#submit'][] = 'maintenance_page_form_system_site_maintenance_mode_submit';
+}
+
+/**
+ * Custom submit handler for the system_site_maintenance_mode() form.
+ */
+function maintenance_page_form_system_site_maintenance_mode_submit($form, &$form_state) {
+  $values = $form_state['values'];
+
+  // Save settings to config.
+  $config = config('maintenance_page.settings');
+  $config->set('heading', $values['maintenance_page_heading']);
+  $config->set('position_x', $values['maintenance_page_position_x']);
+  $config->set('position_y', $values['maintenance_page_position_y']);
+  $config->set('text', $values['maintenance_page_text']);
+  $config->set('page_title', $values['maintenance_page_page_title']);
+  $config->save();
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function maintenance_page_theme_registry_alter(&$theme_registry) {
+  $path = backdrop_get_path('module', 'maintenance_page');
+
+  // Replace maintenance page template.
+  $theme_registry['maintenance_page']['theme path'] = $path;
+  $theme_registry['maintenance_page']['template'] = 'maintenance-page';
+  $theme_registry['maintenance_page']['path'] = $path . '/templates';
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for theme_maintenance_page.
+ */
+function maintenance_page_preprocess_maintenance_page(&$variables) {
+  // Remove all existing CSS, then add ours.
+  backdrop_static_reset('backdrop_add_css');
+  backdrop_add_css(backdrop_get_path('module', 'maintenance_page') . '/css/maintenance_page.css');
+
+  // Make new settings available to template file.
+  $config = config('maintenance_page.settings');
+
+  // Heading.
+  $heading = $config->get('heading');
+  $variables['head_title_array']['title'] = $heading;
+  $variables['title'] = $heading;
+
+  // Positioning.
+  $variables['classes'][] = $config->get('position_y');
+  $variables['main_classes'][] = $config->get('position_x');
+
+  // Text alignment.
+  $variables['main_classes'][] = $config->get('text');
+
+  // Page title.
+  $page_title = $config->get('page_title');
+  foreach ($page_title as $key => $value) {
+    if (!$value) {
+      unset($variables['head_title_array'][$key]);
+    }
+  }
+  $variables['head_title'] = implode(' | ', array_filter($variables['head_title_array']));
+}
+
