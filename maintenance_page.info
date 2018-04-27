@@ -2,4 +2,5 @@ name = Maintenance Page
 description = Provides a customisable 'maintenance mode' page, without the need for theming.
 backdrop = 1.x
 type = module
+configure = admin/config/development/maintenance
 
