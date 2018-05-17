@@ -30,7 +30,9 @@ function maintenance_page_form_system_site_maintenance_mode_alter(&$form, &$form
   $form['maintenance_page_heading'] = array(
     '#type' => 'textfield',
     '#title' => t('Maintenance page heading'),
+    '#description' => theme('token_tree_link'),
     '#default_value' => $config->get('heading'),
+    '#element_validate' => array('token_element_validate'),
     '#weight' => 1,
   );
   $form['maintenance_page_position_x'] = array(
@@ -120,7 +122,7 @@ function maintenance_page_preprocess_maintenance_page(&$variables) {
   $config = config('maintenance_page.settings');
 
   // Heading.
-  $heading = $config->get('heading');
+  $heading = token_replace($config->get('heading'));
   $variables['head_title_array']['title'] = $heading;
   $variables['title'] = $heading;
 
