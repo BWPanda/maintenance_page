@@ -102,44 +102,52 @@ function maintenance_page_form_system_site_maintenance_mode_submit($form, &$form
  * Implements hook_theme_registry_alter().
  */
 function maintenance_page_theme_registry_alter(&$theme_registry) {
-  $path = backdrop_get_path('module', 'maintenance_page');
+  // Don't overwrite core pages (e.g. '/core/update.php').
+  if (strpos(request_uri(), '/core/') !== 0) {
+    $path = backdrop_get_path('module', 'maintenance_page');
 
-  // Replace maintenance page template.
-  $theme_registry['maintenance_page']['theme path'] = $path;
-  $theme_registry['maintenance_page']['template'] = 'maintenance-page';
-  $theme_registry['maintenance_page']['path'] = $path . '/templates';
+    // Replace maintenance page template.
+    $theme_registry['maintenance_page']['theme path'] = $path;
+    $theme_registry['maintenance_page']['template'] = 'maintenance-page';
+    $theme_registry['maintenance_page']['path'] = $path . '/templates';
+  }
 }
 
 /**
  * Implements hook_preprocess_HOOK() for theme_maintenance_page.
  */
 function maintenance_page_preprocess_maintenance_page(&$variables) {
-  // Remove all existing CSS, then add ours.
-  backdrop_static_reset('backdrop_add_css');
-  backdrop_add_css(backdrop_get_path('module', 'maintenance_page') . '/css/maintenance_page.css');
+  // Don't overwrite core pages (e.g. '/core/update.php').
+  if (strpos(request_uri(), '/core/') !== 0) {
 
-  // Make new settings available to template file.
-  $config = config('maintenance_page.settings');
+    // Remove all existing CSS, then add ours.
+    backdrop_static_reset('backdrop_add_css');
+    backdrop_add_css(backdrop_get_path('module', 'maintenance_page') . '/css/maintenance_page.css');
 
-  // Heading.
-  $heading = token_replace($config->get('heading'));
-  $variables['head_title_array']['title'] = $heading;
-  $variables['title'] = $heading;
+    // Make new settings available to template file.
+    $config = config('maintenance_page.settings');
 
-  // Positioning.
-  $variables['classes'][] = $config->get('position_y');
-  $variables['main_classes'][] = $config->get('position_x');
+    // Heading.
+    $heading = token_replace($config->get('heading'));
+    $variables['head_title_array']['title'] = $heading;
+    $variables['title'] = $heading;
 
-  // Text alignment.
-  $variables['main_classes'][] = $config->get('text');
+    // Positioning.
+    $variables['classes'][] = $config->get('position_y');
+    $variables['main_classes'][] = $config->get('position_x');
 
-  // Page title.
-  $page_title = $config->get('page_title');
-  foreach ($page_title as $key => $value) {
-    if (!$value) {
-      unset($variables['head_title_array'][$key]);
+    // Text alignment.
+    $variables['main_classes'][] = $config->get('text');
+
+    // Page title.
+    $page_title = $config->get('page_title');
+    foreach ($page_title as $key => $value) {
+      if (!$value) {
+        unset($variables['head_title_array'][$key]);
+      }
     }
+    $variables['head_title'] = implode(' | ', array_filter($variables['head_title_array']));
+
   }
-  $variables['head_title'] = implode(' | ', array_filter($variables['head_title_array']));
 }
 
